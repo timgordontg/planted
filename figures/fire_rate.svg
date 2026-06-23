@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="680" height="420" fill="white"/>
+<text x="74" y="26" font-size="17" font-weight="700" fill="#1b2733">Fire-rate: pinned at the noise floor, rising only with structure</text>
+<text x="74" y="44" font-size="12" fill="#5b6b7b">Fraction of windows fired vs structure strength. Sits at alpha on noise, climbs as genuine regimes appear.</text>
+<line x1="74" y1="356.0" x2="656" y2="356.0" stroke="#e6ebf0"/>
+<text x="64" y="360.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.00</text>
+<line x1="74" y1="296.0" x2="656" y2="296.0" stroke="#e6ebf0"/>
+<text x="64" y="300.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.05</text>
+<line x1="74" y1="236.0" x2="656" y2="236.0" stroke="#e6ebf0"/>
+<text x="64" y="240.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.10</text>
+<line x1="74" y1="176.0" x2="656" y2="176.0" stroke="#e6ebf0"/>
+<text x="64" y="180.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.15</text>
+<line x1="74" y1="116.0" x2="656" y2="116.0" stroke="#e6ebf0"/>
+<text x="64" y="120.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.20</text>
+<line x1="74" y1="56.0" x2="656" y2="56.0" stroke="#e6ebf0"/>
+<text x="64" y="60.0" font-size="11" text-anchor="end" fill="#5b6b7b">0.25</text>
+<text x="74.0" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">0.0</text>
+<text x="190.4" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">0.2</text>
+<text x="306.8" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">0.4</text>
+<text x="423.2" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">0.6</text>
+<text x="539.6" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">0.8</text>
+<text x="656.0" y="376" font-size="11" text-anchor="middle" fill="#5b6b7b">1.0</text>
+<text x="365" y="382" font-size="12" text-anchor="middle" fill="#1b2733">structure strength (0 = pure noise, 1 = strong regimes)</text>
+<text transform="translate(20,206) rotate(-90)" font-size="12" text-anchor="middle" fill="#1b2733">fire-rate</text>
+<line x1="74" y1="296.0" x2="656" y2="296.0" stroke="#5b6b7b" stroke-dasharray="5 4" stroke-width="1.3"/>
+<text x="652" y="291.0" font-size="11" text-anchor="end" fill="#5b6b7b">alpha = 0.05</text>
+<polyline points="74.0,290.0 190.4,299.2 306.8,292.8 423.2,279.1 539.6,245.2 656.0,223.2" fill="none" stroke="#2563eb" stroke-width="2.4"/>
+<circle cx="74.0" cy="290.0" r="3.2" fill="#2563eb"/>
+<circle cx="190.4" cy="299.2" r="3.2" fill="#2563eb"/>
+<circle cx="306.8" cy="292.8" r="3.2" fill="#2563eb"/>
+<circle cx="423.2" cy="279.1" r="3.2" fill="#2563eb"/>
+<circle cx="539.6" cy="245.2" r="3.2" fill="#2563eb"/>
+<circle cx="656.0" cy="223.2" r="3.2" fill="#2563eb"/>
+<rect x="74" y="393" width="12" height="12" rx="2" fill="#2563eb"/>
+<text x="92" y="403" font-size="12" fill="#1b2733">surrogate-gated-nn</text>
+</svg>
