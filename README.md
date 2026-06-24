@@ -35,6 +35,33 @@ python -m planted demo
 
 No setup, no dependencies. Pure Python.
 
+## It's not just made-up data — here's the real S&P 500
+
+Fair question: sure, it works on your invented markets — but what about real money?
+
+```bash
+python -m planted spx     # the same two finders, on 12 years of real S&P 500
+```
+
+I ran both finders on every trading day of the S&P 500 from 2014 to 2026 — then on
+the **same** data shuffled into meaningless noise, to see if they could tell the
+difference:
+
+| "I've seen this day before"… | …on the real S&P 500 | …on the shuffle |
+|---|---|---|
+| the honest finder | **2% of days** | 5% of days |
+| the tourist | **100% of days** | 100% of days |
+
+The tourist calls almost every day a repeat of an earlier one — in the real market
+**and** in pure noise. It can't tell them apart. The honest finder barely fires on
+either: a handful of days, the same low rate you'd get by chance. By its test,
+day-to-day S&P moves don't repeat in a way you could trade — so it stays quiet,
+instead of selling you a pattern that isn't there.
+
+*(Nothing here is graded against an answer key — real markets don't come with one.
+The demo only asks whether a method claims structure it can't back up. That honest
+question is the whole point.)*
+
 ## Why I built it
 
 I build machine-learning methods for financial markets. The models that make money
