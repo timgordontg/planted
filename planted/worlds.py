@@ -16,11 +16,14 @@ Two kinds of world come out of here:
 
 Generative model (all stdlib, no numpy):
   returns_t = mu(state_t) + sigma_t * vol_scale(state_t) * z_t
-  sigma_t^2 = omega + alpha * eps_{t-1}^2 + beta * sigma_{t-1}^2   # GARCH(1,1)
-  z_t ~ standardized Student-t(df)                                 # fat tails
-  state_t ~ sticky K-state Markov chain                            # regimes
+  sigma_t^2 = omega + (alpha + gamma*[eps_{t-1} < 0]) * eps_{t-1}^2   # GJR-GARCH
+              + beta * sigma_{t-1}^2                                  # (leverage)
+  z_t ~ standardized Student-t(df)                                   # fat tails
+  state_t ~ sticky K-state Markov chain                              # regimes
 
-GARCH(1,1) gives volatility clustering; the Student-t innovations give fat
+The GJR-GARCH recursion gives volatility clustering *and* the leverage effect
+(a negative shock adds ``gamma`` to the ARCH coefficient, so down moves raise
+tomorrow's volatility more than up moves); the Student-t innovations give fat
 tails; the Markov chain gives recurring regimes. Together they reproduce the
 "stylized facts" of real return series (see `stylized_facts`).
 """
@@ -48,7 +51,7 @@ def _student_t(rng, df):
 
 
 def make_world(seed, T=3000, regimes=None, df=8.0,
-               garch=(5.0e-6, 0.05, 0.90), p_stay=0.985):
+               garch=(3.0e-6, 0.02, 0.10, 0.90), p_stay=0.985):
     """Generate one synthetic world.
 
     Parameters
@@ -59,8 +62,10 @@ def make_world(seed, T=3000, regimes=None, df=8.0,
         One (drift, volatility-multiplier) pair per regime. ``None`` (or a
         single regime) produces a NULL world: market-like but structureless.
     df : float            Student-t degrees of freedom (smaller => fatter tails).
-    garch : (omega, alpha, beta)
-        GARCH(1,1) parameters. Defaults are calibrated so unconditional
+    garch : (omega, alpha, gamma, beta)
+        GJR-GARCH(1,1) parameters. ``gamma`` is the leverage term: a negative
+        shock adds it to the ARCH coefficient, so down moves raise next-period
+        volatility more than up moves. Defaults are calibrated so unconditional
         volatility is ≈ 1%/day, the scale of real equity returns.
     p_stay : float        Markov self-transition probability (regime stickiness).
 
@@ -73,7 +78,7 @@ def make_world(seed, T=3000, regimes=None, df=8.0,
     if regimes is None:
         regimes = [(0.0, 1.0)]
     K = len(regimes)
-    omega, alpha, beta = garch
+    omega, alpha, gamma, beta = garch
 
     def next_state(s):
         # Sticky chain: stay with prob p_stay, else jump to a uniform other.
@@ -82,13 +87,18 @@ def make_world(seed, T=3000, regimes=None, df=8.0,
         return rng.choice([k for k in range(K) if k != s])
 
     state = rng.randrange(K)
-    sigma2 = omega / max(1e-9, (1.0 - alpha - beta))   # unconditional variance
+    # Under symmetric innovations a negative shock occurs half the time, so the
+    # expected ARCH coefficient is alpha + gamma/2 — that is what enters the
+    # unconditional variance (and the stationarity budget alpha+gamma/2+beta<1).
+    sigma2 = omega / max(1e-9, (1.0 - alpha - gamma / 2.0 - beta))
     eps_prev = 0.0
     rets, labels = [], []
     for _ in range(T):
         state = next_state(state)
         mu, vscale = regimes[state]
-        sigma2 = omega + alpha * eps_prev * eps_prev + beta * sigma2
+        # GJR asymmetry: a negative prior shock adds gamma to the ARCH term.
+        arch = alpha + (gamma if eps_prev < 0.0 else 0.0)
+        sigma2 = omega + arch * eps_prev * eps_prev + beta * sigma2
         sigma = math.sqrt(sigma2) * vscale
         eps = sigma * _student_t(rng, df)
         rets.append(mu + eps)
@@ -101,11 +111,19 @@ def make_world(seed, T=3000, regimes=None, df=8.0,
 # Difficulty knob: interpolate regimes from "all identical" to "well separated"
 # ---------------------------------------------------------------------------
 
-# Three archetypal regimes (drift, volatility multiplier).
+# Three archetypal regimes (drift, volatility multiplier). Regimes are separated
+# mostly by DRIFT and only mildly by volatility (0.95 / 1.25 / 1.05). That is
+# deliberate: a wide vol spread would give the regimes away by a blunt mixture
+# of variances and inflate the marginal excess kurtosis into the dozens. A
+# single regime (a NULL world) keeps textbook kurtosis (~4); a three-regime
+# world runs higher from the vol mixture (~15-18) — which is itself realistic
+# for a series spanning calm and crisis. Separating on drift keeps the marginal
+# distribution market-shaped while leaving the regimes genuinely discoverable:
+# they must be *inferred*, not read straight off a volatility gauge.
 REGIME_TARGETS = [
-    (0.0003, 0.7),    # calm: gentle drift up, low vol
-    (-0.0010, 1.8),   # stress: drift down, high vol
-    (0.0000, 1.1),    # choppy: no drift, moderate vol
+    (0.0018, 0.95),   # calm: steady drift up, slightly low vol
+    (-0.0024, 1.25),  # stress: drift down, elevated vol
+    (0.0000, 1.05),   # choppy: no drift, near-baseline vol
 ]
 _MEAN_MU = mean(m for m, _ in REGIME_TARGETS)
 _MEAN_V = mean(v for _, v in REGIME_TARGETS)

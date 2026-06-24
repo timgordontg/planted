@@ -10,9 +10,7 @@ Zero dependencies, pure standard library. Quick start:
 
     import planted
     planted.leaderboard(planted.ROSTER)          # score the reference methods
-
-    rets = planted.load_returns("yourdata.csv")  # bring your own series
-    print(planted.format_explore(planted.explore(rets)))
+    card = planted.run_benchmark(planted.SurrogateGatedNN())["scorecard"]
 """
 
 from .worlds import (make_world, regimes_from_sep, stylized_facts,
@@ -22,7 +20,6 @@ from .methods import (Method, RandomMatcher, UngatedNN, SurrogateGatedNN,
 from .score import (recovery_skill, noise_rejection, calibration, composite,
                     fire_rate, fired_agreements)
 from .benchmark import run_benchmark, leaderboard
-from .data import load_returns, explore, format_explore
 
 __version__ = "0.1.0"
 
@@ -31,6 +28,5 @@ __all__ = [
     "REGIME_TARGETS", "Method", "RandomMatcher", "UngatedNN", "SurrogateGatedNN",
     "ROSTER", "window_features", "embed_all", "recovery_skill",
     "noise_rejection", "calibration", "composite", "fire_rate",
-    "fired_agreements", "run_benchmark", "leaderboard", "load_returns",
-    "explore", "format_explore", "__version__",
+    "fired_agreements", "run_benchmark", "leaderboard", "__version__",
 ]

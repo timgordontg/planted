@@ -78,7 +78,7 @@ def run_benchmark(method, seps=DEFAULT_SEPS, n_seeds=12, T=2000, progress=None):
     return {"recovery": rec_curve, "fire_rate": fire_curve, "scorecard": scorecard}
 
 
-def leaderboard(methods, n_seeds=10, T=2000, verbose=True):
+def leaderboard(methods, n_seeds=12, T=2000, verbose=True):
     """Run a roster and return scorecards sorted by composite (best first)."""
     cards = []
     for cls in methods:

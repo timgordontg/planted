@@ -17,8 +17,8 @@
 <text transform="translate(20,206) rotate(-90)" font-size="12" text-anchor="middle" fill="#1b2733">matches fired on pure noise</text>
 <line x1="74" y1="341.0" x2="656" y2="341.0" stroke="#5b6b7b" stroke-dasharray="5 4" stroke-width="1.3"/>
 <text x="652" y="336.0" font-size="11" text-anchor="end" fill="#5b6b7b">alpha = 0.05 (honest floor)</text>
-<rect x="122.5" y="339.5" width="97.0" height="16.5" rx="3" fill="#2563eb"/>
-<text x="171.0" y="332.5" font-size="12" font-weight="700" text-anchor="middle" fill="#2563eb">5%</text>
+<rect x="122.5" y="337.5" width="97.0" height="18.5" rx="3" fill="#2563eb"/>
+<text x="171.0" y="330.5" font-size="12" font-weight="700" text-anchor="middle" fill="#2563eb">6%</text>
 <text x="171.0" y="376" font-size="11.5" text-anchor="middle" fill="#1b2733">surrogate-gated-nn</text>
 <rect x="316.5" y="336.5" width="97.0" height="19.5" rx="3" fill="#16a34a"/>
 <text x="365.0" y="329.5" font-size="12" font-weight="700" text-anchor="middle" fill="#16a34a">6%</text>

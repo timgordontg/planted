@@ -11,7 +11,12 @@ tradeoff. That is the whole point: an open frame where a real idea gets a real,
 ground-truthed result, ad hoc.
 """
 
+import os
+import sys
 from statistics import mean, pstdev
+
+# Run straight from a fresh clone (no install): put the repo root on the path.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from planted import run_benchmark
 from planted.methods import SurrogateGatedNN, embed_all, standardize, \

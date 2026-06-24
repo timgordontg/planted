@@ -34,8 +34,8 @@ python -m planted demo
 ```
 planted :: demo — does the method know when to say 'nothing here'?
 
-  surrogate-gated-nn   composite=0.201  recovery(structure)=0.219  fire-rate(noise)=0.054
-  ungated-nn           composite=0.007  recovery(structure)=0.141  fire-rate(noise)=1.000
+  surrogate-gated-nn   composite=0.153  recovery(structure)=0.185  fire-rate(noise)=0.060
+  ungated-nn           composite=0.007  recovery(structure)=0.145  fire-rate(noise)=1.000
 
   The tourist (ungated) finds 'analogs' even in pure noise, so its
   composite collapses. Only abstaining on noise earns the score.
@@ -67,13 +67,13 @@ python -m planted bench
   method                composite  noise rec.  noise fire  struct rec.
   (want)                     high          ~0      ~alpha         high
   --------------------------------------------------------------------------
-  surrogate-gated-nn        0.205       0.039       0.055        0.226
-  ungated-nn                0.007       0.001       1.000        0.148
-  random                    0.000      -0.073       0.065       -0.073
+  surrogate-gated-nn        0.153      -0.056       0.060        0.185
+  ungated-nn                0.007       0.007       1.000        0.145
+  random                    0.000      -0.042       0.062       -0.042
   --------------------------------------------------------------------------
 ```
 
-Read across the **ungated-nn** row: its `struct rec.` (0.148) looks like real
+Read across the **ungated-nn** row: its `struct rec.` (0.145) looks like real
 skill — but its `noise fire` is `1.000`. It fires on everything, so its apparent
 recovery is just the half of a broken clock that happens to be right. The
 composite nets the two and the tourist drops to ~0. **random** is the floor: an
@@ -105,12 +105,14 @@ nothing on nothing, and more as there is more to do.
 Three pieces, each a small, readable module:
 
 **1. Worlds with ground truth** (`planted/worlds.py`).
-Returns are generated from a regime-switching GARCH(1,1) process with Student-t
-(fat-tailed) innovations and a sticky Markov chain of hidden regimes. The regime
-labels are kept as ground truth. Every world — structured or null — must pass a
-**stylized-facts validator** (fat tails, volatility clustering, ~zero return
-autocorrelation, leverage effect) so it actually looks like a market. A null
-world is statistically a market with *no regime to find*: the trap.
+Returns are generated from a regime-switching **GJR-GARCH** process — GARCH
+volatility clustering plus a leverage term, so a down move raises tomorrow's
+volatility more than an equal up move — with Student-t (fat-tailed) innovations
+and a sticky Markov chain of hidden regimes. The regime labels are kept as
+ground truth. Every world — structured or null — must pass a **stylized-facts
+validator** (fat tails, volatility clustering, ~zero return autocorrelation,
+leverage effect) so it actually looks like a market. A null world is
+statistically a market with *no regime to find*: the trap.
 
 **2. Methods** (`planted/methods.py`).
 A *method* proposes "analogs" — pairs of historical windows it believes are the
@@ -141,35 +143,6 @@ finding analogs everywhere — only by finding real ones *and* abstaining on noi
 > matcher — the benchmark fooling *itself*. `planted` corrects for this so an
 > honest-but-useless method centers at exactly zero skill. See
 > `score.expected_agreement`.
-
----
-
-## Bring your own data
-
-Real markets don't come with ground truth — but the method machinery runs on any
-return series, and answers the one question that survives without labels:
-
-> *Does this method find more structure in my series than in
-> structure-destroyed copies of it?*
-
-```bash
-python -m planted explore yourdata.csv
-```
-
-```
-  series length      : 2500 returns
-  stylized facts     : kurtosis=+48.02  vol-cluster=+0.520  leverage=-0.122  marketlike=True
-  method             : surrogate-gated-nn
-  fire-rate (real)   : 0.274
-  fire-rate (surrog) : 0.058 +/- 0.026
-  z-score            : +8.28   (real vs structure-destroyed)
-  surrogate p-value  : 0.048
-  VERDICT            : evidence of real recurrence structure
-```
-
-CSV in, verdict out. The last column is used by default; pass `--col NAME|IDX` to
-pick another and `--kind price|return` to override auto-detection (prices are
-converted to log returns).
 
 ---
 
@@ -226,14 +199,26 @@ No dependencies. Python 3.9+.
 
 ---
 
-## Why this exists
+## What this is — and how it relates to my work
 
-A backtest that only rewards finding patterns will always be gamed by a method
-that finds patterns in everything. The discipline that separates a real edge from
-an overfit story is **knowing when to abstain** — and you can only measure that
-if you build worlds where the right answer is *"there's nothing here."*
-`planted` builds those worlds, labels them, and scores honesty as a first-class
-metric.
+`planted` is a **methodology demo, not a trading system.** I build machine-learning
+methods for financial markets; the models that act on real markets — and the
+features and signals behind them — stay private. What's open here is the part I
+think is most transferable and most often skipped: *how you prove a
+pattern-discovery method is honest before you trust it.*
+
+The discipline at its center — **measure whether a method abstains on noise, not
+just whether it finds patterns** — is one I apply in my own research. A method that
+"discovers" structure in everything is worse than useless on a real market: it is
+a confident liar, and a backtest that only rewards finding patterns will always be
+gamed by it. The thing that separates a real edge from an overfit story is knowing
+when to say *"there's nothing here"* — and you can only measure that if you build
+worlds where that is the right answer. `planted` builds those worlds, labels the
+noise, and scores honesty as a first-class metric.
+
+So no edge is given away here, and none is implied: this is the **evaluation layer**
+made public — a way to show how I think about honest method-building, and to find
+people who care about the same problem. If that's you, get in touch.
 
 ## License
 
