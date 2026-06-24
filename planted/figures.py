@@ -148,29 +148,30 @@ def generate(outdir="figures", n_seeds=10):
     """Run the benchmark and write the README figures. Returns the file paths."""
     import os
     from .benchmark import run_benchmark
-    from .methods import RandomMatcher, UngatedNN, SurrogateGatedNN
+    from .methods import UngatedNN, SurrogateGatedNN
 
     print("  generating figures (running benchmark) ...", flush=True)
     gated = run_benchmark(SurrogateGatedNN(), n_seeds=n_seeds,
                           progress=lambda sep: print(f"    gated sep={sep:.1f}",
                                                      flush=True))
-    # Hero figure: hallucination on PURE NOISE (sep=0 fire-rate) per method.
+    # Hero figure: the a-ha — how often each method "finds a pattern" in PURE
+    # NOISE (sep=0 fire-rate). Two players, plain labels, lower is more honest.
     noise_bars = []
-    for cls, color in [(RandomMatcher, "green"), (SurrogateGatedNN, "blue"),
-                       (UngatedNN, "red")]:
+    for cls, label, color in [(SurrogateGatedNN, "The honest method", "blue"),
+                              (UngatedNN, "The hallucinator", "red")]:
         res = run_benchmark(cls(), seps=(0.0,), n_seeds=n_seeds)
-        noise_bars.append((cls.name, res["fire_rate"][0][1], color))
+        noise_bars.append((label, res["fire_rate"][0][1], color))
     noise_bars.sort(key=lambda b: b[1])
 
     os.makedirs(outdir, exist_ok=True)
     paths = {}
 
     hero = bar_chart(
-        "When there's nothing to find, does the method admit it?",
-        "Fire-rate on PURE-NOISE worlds (no structure exists). Lower is honest.",
-        "matches fired on pure noise",
+        'How often each "found a pattern" in PURE RANDOM NOISE',
+        "There is nothing to find. Lower is more honest.",
+        "of pure noise flagged as a “pattern”",
         noise_bars, 0.0, 1.0,
-        refs=[(0.05, MUTED, "alpha = 0.05 (honest floor)")])
+        refs=[(0.05, MUTED, "honest floor (5%)")])
     paths["hallucination"] = f"{outdir}/hallucination.svg"
     open(paths["hallucination"], "w").write(hero)
 
