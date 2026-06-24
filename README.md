@@ -99,6 +99,21 @@ library — readable in one sitting.
 
 </details>
 
+## Bring your own pattern-finder
+
+`planted` isn't a closed demo — it's an open frame. Write your own finder in about
+twenty lines, drop it in, and it gets the same honest, ground-truthed score as
+everything else:
+
+```bash
+python examples/custom_method.py    # a starter finder — edit it, re-run, watch the score move
+```
+
+Change how it *sees* the market (the `features` function) and the score moves in
+front of you: a richer representation usually finds more real patterns, but has a
+harder time staying honest on the noise. I'm not handing you a number to trust —
+you run it and read it off yourself. That's the whole reason it's public.
+
 ## License
 
 MIT © Tim Gordon
