@@ -1,65 +1,66 @@
 # planted
 
-**A market that knows the right answer.**
+### Can a pattern-finder tell a real signal from random noise?
 
-`planted` is a benchmark for pattern-discovery methods on financial time series.
-It generates synthetic markets with *planted* ground truth — and, crucially,
-sometimes with **no structure at all** — then grades a method on two axes that
-pull against each other:
+Most can't. **`planted`** is a 30-second test that proves it.
 
-- **Recovery** — when there *is* real structure, does the method find it?
-- **Noise-rejection** — when there is **nothing to find**, does the method
-  *admit it* and abstain, instead of hallucinating an "analog" anyway?
-
-Most backtests only measure the first. That is how a method can look brilliant
-and be fooling itself: on pure noise it still "discovers" patterns, and you never
-notice because the noise was never labelled. `planted` labels the noise. A method
-that screams *"analog!"* in a structureless world is caught and its score
-collapses — no matter how good it looked on the structured worlds.
-
-> The headline metric is **noise-rejection, not recovery.** Finding patterns is
-> easy. Knowing when there are none is the hard, valuable part — and the part
-> that survives contact with a real market.
-
-Zero dependencies. Pure Python standard library. Runs anywhere.
+*An open finding from my machine-learning research on financial markets — by Tim Gordon.*
 
 ---
 
-## The one-line demo
+> Show a fortune teller anything — even TV static — and they'll confidently "see"
+> a pattern in it. A surprising amount of market-prediction software does the exact
+> same thing: it finds "signals" in pure randomness, looks brilliant in a backtest,
+> then loses money the moment it meets data it has never seen.
+
+## The a-ha (run it yourself, ~10 seconds)
 
 ```bash
 python -m planted demo
 ```
 
 ```
-planted :: demo — does the method know when to say 'nothing here'?
+planted :: I just fed two pattern-finders 2,000 days of PURE RANDOM
+           NOISE. There is no pattern in it. I made sure.
 
-  surrogate-gated-nn   composite=0.153  recovery(structure)=0.185  fire-rate(noise)=0.060
-  ungated-nn           composite=0.007  recovery(structure)=0.145  fire-rate(noise)=1.000
-
-  The tourist (ungated) finds 'analogs' even in pure noise, so its
-  composite collapses. Only abstaining on noise earns the score.
+  surrogate-gated-nn   found a "pattern" in    6% of it   ->  basically said "nothing here"  [ok]
+  ungated-nn           found a "pattern" in  100% of it   ->  "PATTERN!" ...in random noise  [x]
 ```
 
-Two methods, same nearest-neighbour search. One adds a significance gate; one
-doesn't. On structured worlds they look comparable. On **pure-noise** worlds the
-ungated "tourist" fires on *100% of windows* — it cannot help itself — so its
-headline composite collapses to ~0.
+Same math under the hood. The only difference: **one method is allowed to say
+*"nothing here."*** The other can't — so it "finds" a pattern in *every single
+window* of pure noise. That second one is the one that looks like a genius in a
+backtest and goes broke live.
 
-![Fire-rate on pure-noise worlds, by method](figures/hallucination.svg)
+![What each method does on PURE NOISE — lower is honest](figures/hallucination.svg)
 
-This is the whole thesis in one chart: **lower is honest.** The dashed line is
-the honest floor (`alpha = 0.05`). A calibrated method sits on it. A method that
-"finds something" everywhere sits at the top — and that is a liability, not a
-feature.
+**That's the whole idea: finding patterns is easy. Knowing when there aren't any is
+the hard part — and the only part that survives a real market.**
 
----
+## Why this exists (and who I am)
 
-## The leaderboard
+I'm an ML researcher building methods for financial markets. The models that
+actually make money stay private — but *how I keep myself honest* doesn't have to.
+
+`planted` is that part, in the open. It builds a tiny synthetic market where I can
+**plant** a real pattern — or plant *nothing at all* — and then check whether a
+method is honest enough to tell the difference. No edge is given away here, and
+none is implied. It's the discipline, not the secret sauce.
+
+If you build, or hire for, machine learning that knows a signal from a story —
+**say hi.**
+
+## Play with it
 
 ```bash
-python -m planted bench
+git clone https://github.com/timgordontg/planted && cd planted
+
+python -m planted demo     # the a-ha above (~10s): honesty vs hallucination on pure noise
+python -m planted bench    # the full scoreboard — now with REAL patterns mixed in
 ```
+
+`bench` is where it gets satisfying. The honest method and the hallucinator look
+*almost the same* at finding real patterns — until you score what they do on noise:
 
 ```
   PLANTED LEADERBOARD  (higher composite = better)
@@ -73,152 +74,36 @@ python -m planted bench
   --------------------------------------------------------------------------
 ```
 
-Read across the **ungated-nn** row: its `struct rec.` (0.145) looks like real
-skill — but its `noise fire` is `1.000`. It fires on everything, so its apparent
-recovery is just the half of a broken clock that happens to be right. The
-composite nets the two and the tourist drops to ~0. **random** is the floor: an
-honest-but-useless control that recovers nothing and correctly fires at ~`alpha`.
+Look at **ungated-nn**: its `struct rec.` (0.145) is nearly as high as the honest
+method's (0.185) — real-looking skill! But `noise fire` is `1.000`: it fires on
+*everything*. Once you penalize that, its score collapses to ~0. The hallucinator
+is exposed only because we measured honesty, not just hits.
 
----
+## ...okay, how does it actually work?
 
-## How a calibrated method behaves
+Three small, readable, zero-dependency modules:
 
-Sweep the structure dial from `sep = 0` (pure noise) to `sep = 1` (strong
-regimes) and watch a properly-gated method:
+- **`worlds.py`** — builds synthetic markets that genuinely behave like real ones
+  (fat tails, volatility clustering, the leverage effect — a regime-switching
+  GJR-GARCH process). Some get a hidden pattern planted in them; some get nothing.
+  *We keep the answer key.*
+- **`methods.py`** — the pattern-finders. The honest one only counts a match if it's
+  stronger than the same hunt run on a **scrambled** copy of the data (a
+  surrogate-data significance test). That's what earns it the right to say "nothing
+  here."
+- **`score.py`** — grades two things at once: **recovery** (did it find the real
+  patterns?) and **noise-rejection** (did it shut up on noise?). The headline score
+  is their product, so you cannot win by finding patterns everywhere.
 
-**Recovery rises only when real structure exists** — and sits at ~0 on noise, so
-it never claims skill it doesn't have:
-
-![Recovery skill vs structure strength](figures/recovery.svg)
-
-**Fire-rate stays pinned at the noise floor** until genuine regimes appear:
-
-![Fire-rate vs structure strength](figures/fire_rate.svg)
-
-Those two curves *are* the definition of a trustworthy discovery method: it does
-nothing on nothing, and more as there is more to do.
-
----
-
-## How it works
-
-Three pieces, each a small, readable module:
-
-**1. Worlds with ground truth** (`planted/worlds.py`).
-Returns are generated from a regime-switching **GJR-GARCH** process — GARCH
-volatility clustering plus a leverage term, so a down move raises tomorrow's
-volatility more than an equal up move — with Student-t (fat-tailed) innovations
-and a sticky Markov chain of hidden regimes. The regime labels are kept as
-ground truth. Every world — structured or null — must pass a **stylized-facts
-validator** (fat tails, volatility clustering, ~zero return autocorrelation,
-leverage effect) so it actually looks like a market. A null world is
-statistically a market with *no regime to find*: the trap.
-
-**2. Methods** (`planted/methods.py`).
-A *method* proposes "analogs" — pairs of historical windows it believes are the
-same kind of market state — each with a p-value and a fired/abstained decision.
-Three reference methods ship so you can see the spread:
-
-| method | what it is |
-| --- | --- |
-| `RandomMatcher` | honest-but-useless control; fires at random rate `alpha`. The floor. |
-| `UngatedNN` | the *tourist*: always calls its nearest neighbour an analog. Cannot abstain. |
-| `SurrogateGatedNN` | the *practitioner*: a match only counts if it is closer than a structure-destroyed **surrogate** of the same series would produce. |
-
-The gate is surrogate-data hypothesis testing: block-bootstrap the series to
-destroy long-range regime structure while preserving its marginals and
-short-range stylized facts, then keep a match only if it is anomalously close
-relative to that null. That is what lets a method *abstain*.
-
-**3. Scoring** (`planted/score.py`).
-`recovery` is a chance-corrected skill score: among the matches a method *fired*,
-how often do the two windows actually share a planted regime, above what random
-pairing would give? `noise-rejection` penalizes firing above `alpha` on null
-worlds. The headline `composite = recovery × noise-rejection` cannot be won by
-finding analogs everywhere — only by finding real ones *and* abstaining on noise.
-
-> **The chance baseline is conditioned on how the method is allowed to pair
-> windows** (matches must be ≥ `min_gap` apart in time). Scoring against the
-> naive unconditional baseline leaves a residual phantom "skill" in a random
-> matcher — the benchmark fooling *itself*. `planted` corrects for this so an
-> honest-but-useless method centers at exactly zero skill. See
-> `score.expected_agreement`.
-
----
-
-## Write your own method
-
-Subclass `Method`, implement `match`, drop it into the benchmark. The full
-example is in [`examples/custom_method.py`](examples/custom_method.py) — a custom
-window representation in ~20 lines:
-
-```python
-from planted import run_benchmark
-from planted.methods import SurrogateGatedNN
-
-class MyMethod(SurrogateGatedNN):
-    name = "my-method"
-    # ...swap in your own window features / representation...
-
-card = run_benchmark(MyMethod(), n_seeds=8)["scorecard"]
-print(card["composite"], card["noise_recovery"], card["struct_recovery"])
-```
-
-Change the representation, re-run, and read a real, ground-truthed result —
-including whether your clever new feature just made the method hallucinate more.
-
----
-
-## The benchmark grades itself
-
-The most important tests in this repo are the **null-sanity checks**
-([`tests/test_null_sanity.py`](tests/test_null_sanity.py)): they assert that on
-pure noise an honest method's recovery is statistically consistent with **zero**,
-that the tourist hallucinates in that same noise, and that real structure is
-genuinely recovered. They are what make `planted` *falsifiable* — if the
-framework were fooling itself, they would fail.
+And it **grades itself.** The checks in
+[`tests/test_null_sanity.py`](tests/test_null_sanity.py) fail if the framework is
+fooling *itself* — they prove an honest method scores ~0 on pure noise. Run them:
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-Pure stdlib `unittest`, no install required.
-
----
-
-## Install
-
-```bash
-pip install planted          # once published
-# or, from source:
-git clone https://github.com/timgordontg/planted && cd planted
-python -m planted demo
-```
-
-No dependencies. Python 3.9+.
-
----
-
-## What this is — and how it relates to my work
-
-`planted` is a **methodology demo, not a trading system.** I build machine-learning
-methods for financial markets; the models that act on real markets — and the
-features and signals behind them — stay private. What's open here is the part I
-think is most transferable and most often skipped: *how you prove a
-pattern-discovery method is honest before you trust it.*
-
-The discipline at its center — **measure whether a method abstains on noise, not
-just whether it finds patterns** — is one I apply in my own research. A method that
-"discovers" structure in everything is worse than useless on a real market: it is
-a confident liar, and a backtest that only rewards finding patterns will always be
-gamed by it. The thing that separates a real edge from an overfit story is knowing
-when to say *"there's nothing here"* — and you can only measure that if you build
-worlds where that is the right answer. `planted` builds those worlds, labels the
-noise, and scores honesty as a first-class metric.
-
-So no edge is given away here, and none is implied: this is the **evaluation layer**
-made public — a way to show how I think about honest method-building, and to find
-people who care about the same problem. If that's you, get in touch.
+No dependencies. Python 3.9+. Pure standard library.
 
 ## License
 
