@@ -1,10 +1,10 @@
 """
 Command line entry point.
 
-    python -m planted demo                 the a-ha: honesty vs hallucination on noise
-    python -m planted bench                full leaderboard, with real patterns mixed in
-    python -m planted spx                  the same test on 12 years of real S&P 500
-    python -m planted figures              regenerate the README figures
+    python3 -m planted demo                 the a-ha: honesty vs hallucination on noise
+    python3 -m planted bench                full leaderboard, with real patterns mixed in
+    python3 -m planted spx                  the same test on 12 years of real S&P 500
+    python3 -m planted figures              regenerate the README figures
 
 Run with no arguments for this help.
 """
@@ -35,7 +35,7 @@ def _demo():
     print('  say "nothing here." The other can\'t — so it hallucinates structure')
     print("  that isn't there. That second one is what looks like genius in a")
     print("  backtest and goes broke on data it has never seen.\n")
-    print("  Full scoreboard, with REAL patterns mixed in:  python -m planted bench")
+    print("  Full scoreboard, with REAL patterns mixed in:  python3 -m planted bench")
 
 
 def _bench():
@@ -55,6 +55,11 @@ def _spx():
     spx = returns()
     d0, d1 = SPAN
 
+    print(f"planted :: this time I ran the same two finders on the REAL S&P 500 —")
+    print(f"           every trading day from {d0} to {d1} ({len(spx):,} days).")
+    print("           Nobody planted anything here. This is the actual market.\n")
+    print("           thinking...\n")
+
     def fires_on(series):
         honest = fire_rate(SurrogateGatedNN().match(series, seed=0)[0])
         tourist = fire_rate(UngatedNN().match(series, seed=0)[0])
@@ -67,9 +72,6 @@ def _spx():
     h_shuf = round(mean(fires_on(s)[0] for s in shuffles))
     t_shuf = round(mean(fires_on(s)[1] for s in shuffles))
 
-    print(f"planted :: this time I ran the same two finders on the REAL S&P 500 —")
-    print(f"           every trading day from {d0} to {d1} ({len(spx):,} days).")
-    print("           Nobody planted anything here. This is the actual market.\n")
     print(f'  honest finder   said "I\'ve seen this before" about {h_real:>4}% of days')
     print(f'  the tourist     said "I\'ve seen this before" about {t_real:>4}% of days\n')
     print("  Now the tell. I shuffled that same S&P 500 into meaningless noise")
@@ -83,7 +85,7 @@ def _spx():
     print("  in a way you could trade — so it stays quiet, instead of selling you a")
     print("  pattern that isn't there. That restraint is the whole skill.\n")
     print("  How that honest finder works:")
-    print("    python -m planted bench")
+    print("    python3 -m planted bench")
 
 
 def _figures():

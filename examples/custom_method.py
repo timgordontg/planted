@@ -1,7 +1,7 @@
 """
 Write your own method in ~20 lines, then score it against planted ground truth.
 
-Run:  python examples/custom_method.py
+Run:  python3 examples/custom_method.py
 
 This defines a deliberately simple method — nearest-neighbor on a 2-feature
 representation (volatility + drift only), gated by the same surrogate test the
@@ -13,14 +13,13 @@ ground-truthed result, ad hoc.
 
 import os
 import sys
-from statistics import mean, pstdev
 
 # Run straight from a fresh clone (no install): put the repo root on the path.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from planted import run_benchmark
 from planted.methods import SurrogateGatedNN, embed_all, standardize, \
-    nearest_neighbors, block_bootstrap
+    nearest_neighbors, block_bootstrap, mean, pstdev
 
 
 def features(window):

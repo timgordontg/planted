@@ -27,7 +27,18 @@ them or roll its own representation.
 
 import math
 import random
-from statistics import mean, pstdev
+
+
+# Plain float mean/pstdev. The stdlib ``statistics`` versions compute with
+# exact rational arithmetic — beautiful, but ~10x slower, and these run inside
+# the innermost loop of every method.
+def mean(x):
+    return sum(x) / len(x)
+
+
+def pstdev(x):
+    m = sum(x) / len(x)
+    return math.sqrt(sum((v - m) ** 2 for v in x) / len(x))
 
 
 # ---------------------------------------------------------------------------
@@ -74,8 +85,7 @@ def standardize(feats):
     return [[(r[j] - mu[j]) / sd[j] for j in range(len(r))] for r in feats]
 
 
-def _dist(a, b):
-    return math.sqrt(sum((a[j] - b[j]) ** 2 for j in range(len(a))))
+_dist = math.dist          # C-implemented Euclidean distance — the inner loop
 
 
 def nearest_neighbors(Z, spans, min_gap):

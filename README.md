@@ -30,7 +30,7 @@ Run it yourself — about ten seconds:
 
 ```bash
 git clone https://github.com/timgordontg/planted && cd planted
-python -m planted demo
+python3 -m planted demo
 ```
 
 No setup, no dependencies. Pure Python.
@@ -40,7 +40,7 @@ No setup, no dependencies. Pure Python.
 Fair question: sure, it works on your invented markets — but what about real money?
 
 ```bash
-python -m planted spx     # the same two finders, on 12 years of real S&P 500
+python3 -m planted spx     # the same two finders, on 12 years of real S&P 500
 ```
 
 I ran both finders on every trading day of the S&P 500 from 2014 to 2026 — then on
@@ -77,7 +77,7 @@ separates a real edge from a story that falls apart on live data.
 ## Go deeper
 
 ```bash
-python -m planted bench    # the full scoreboard — now with real patterns mixed in
+python3 -m planted bench    # the full scoreboard — now with real patterns mixed in
 ```
 
 <details>
@@ -93,7 +93,7 @@ Every method is then scored on two things at once: did it find the real patterns
 **and** did it stay quiet on the noise? The headline score multiplies the two — so
 you cannot win by crying "pattern!" at everything.
 
-It even grades itself: `python -m unittest discover -s tests` runs checks that fail
+It even grades itself: `python3 -m unittest discover -s tests` runs checks that fail
 if the framework is fooling *itself*. Under a thousand lines of pure standard
 library — readable in one sitting.
 
@@ -106,7 +106,7 @@ twenty lines, drop it in, and it gets the same honest, ground-truthed score as
 everything else:
 
 ```bash
-python examples/custom_method.py    # a starter finder — edit it, re-run, watch the score move
+python3 examples/custom_method.py    # a starter finder — edit it, re-run, watch the score move
 ```
 
 Change how it *sees* the market (the `features` function) and the score moves in

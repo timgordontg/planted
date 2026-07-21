@@ -5,7 +5,7 @@ These are the tests that make `planted` falsifiable: if the framework were
 fooling itself, they would fail. They assert that on pure-noise worlds an honest
 method recovers ~nothing and fires at ~alpha, that a no-gate "tourist"
 hallucinates analogs in that same noise, and that real structure is genuinely
-recovered. Pure stdlib `unittest` — `python -m unittest` runs them, no install.
+recovered. Pure stdlib `unittest` — `python3 -m unittest` runs them, no install.
 Takes ~a minute: the null claims are pooled estimates, so the suite spends real
 seeds to resolve them rather than asserting against a hand-tuned threshold.
 """
