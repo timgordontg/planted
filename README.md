@@ -2,10 +2,10 @@
 
 **Can a machine tell a real pattern from random noise?**
 
-Most market-prediction software can't — and that's exactly how it fools people.
+Most market-prediction software can't, and that's exactly how it fools people.
 `planted` is a 10-second demo that proves it.
 
-*An open piece of my machine-learning research on financial markets. — Tim Gordon*
+*An open piece of my machine-learning research on financial markets. - Tim Gordon*
 
 ---
 
